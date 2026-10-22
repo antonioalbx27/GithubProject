@@ -10,6 +10,14 @@ use Illuminate\View\View;
 
 class AlumnoController extends Controller
 {
+    private const RULES = [
+            'nombre' => 'required|string|max:100|min:2',
+            'apellido' => 'required|string|max:130|min:100',
+            'fnac' => 'nullable|date|before_or_equal:today',
+            'genero' => 'nullable|in:masculino,femenino,otro',
+            'notaacceso'=> 'nullable|numeric|gte:0|lte:10|decimal:2',
+        ];
+
     public function create(): View
     {
         //
@@ -17,8 +25,18 @@ class AlumnoController extends Controller
     }
 
     public function destroy(Alumno $alumno): RedirectResponse
-    {
-        dd(['destroy', $alumno]);
+    {   
+        try{
+            $alumno->delete();
+        } catch(\Exception $e){
+            return back()->withErrors([
+                'error' => 'No se ha podido borrar el alumno.',
+                //'nombre' => 'Este campo forma parte de la clave unica',
+                //'apellido' => 'Este campo forma parte de la clave unica'
+            ]);
+        }
+        return redirect()->route('alumno.index')->with(['success' => 'Se ha borradp el alumno']);
+
     }
 
     public function edit(Alumno $alumno): View
@@ -27,27 +45,8 @@ class AlumnoController extends Controller
         return view('alumno.edit', ['alumno'=>$alumno]);
     }
 
-    public function index(): View
-    {
-        return view('alumno.index', ['alumnos' => Alumno::all()]);
-    }
-
-    public function show(Alumno $alumno): View
-    {
-        //
-        return view('alumno.show', ['alumno'=>$alumno]);
-    }
-
-    function store(Request $request): RedirectResponse{
-        //1º Validar
-        $rules =  [
-            'nombre' => 'required|string|max:100|min:2',
-            'apellido' => 'required|string|max:130|min:100',
-            'fnac' => 'nullable|date|before_or_equal:today',
-            'genero' => 'nullable|in:masculino,femenino,otro',
-            'notaacceso'=> 'nullable|numeric|gte:0|lte:10|decimal:2',
-        ];
-        $messages = [
+     private static function getMessages():array {
+          return [
             'nombre.required' => '',
             'nombre.string' => '',
             'nombre.max' => '',
@@ -66,7 +65,27 @@ class AlumnoController extends Controller
 
 
         ];
-        $validator = Validator::make($request->all(), $rules, $messages);
+    }
+
+    public function index(): View
+    {
+        return view('alumno.index', ['alumnos' => Alumno::all()]);
+        session()->forget('success');
+    }
+
+    public function show(Alumno $alumno): View
+    {
+        //
+
+        return view('alumno.show', ['alumno'=>$alumno]);
+    }
+
+    function store(Request $request): RedirectResponse{
+        //1º Validar
+
+       $messages = self::getMessages();
+        
+        $validator = Validator::make($request->all(), self::RULES, $messages);
 
         if($validator->fails()){
              return back()->withInput()->withErrors($validator);
@@ -82,11 +101,15 @@ class AlumnoController extends Controller
                 //'apellido' => 'Este campo forma parte de la clave unica'
             ]);
         } catch(\Exception $e){
-            echo 'global';
-            dd($e);
+             return back()->withInput()->withErrors([
+                'error' => 'No se ha podido crear el alumno.',
+                //'nombre' => 'Este campo forma parte de la clave unica',
+                //'apellido' => 'Este campo forma parte de la clave unica'
+            ]);
+            
         }
         
-        return redirect()->route('alumno.index');
+        return redirect()->route('alumno.index')->with(['success' => 'Se ha creado el alumno']);
     }
 
     /*
@@ -107,7 +130,25 @@ class AlumnoController extends Controller
 
     public function update(Request $request, Alumno $alumno): RedirectResponse
     {
-        $alumno -> update($request->all());
+        
+ $alumno -> update($request->all());
+        try{
+        $alumno->update();
+        } catch(UniqueConstraintViolationException $e) {
+            return back()->withInput()->withErrors([
+                'error' => 'Nombre y apellidos ya existentes.',
+                //'nombre' => 'Este campo forma parte de la clave unica',
+                //'apellido' => 'Este campo forma parte de la clave unica'
+            ]);
+        } catch(\Exception $e){
+             return back()->withInput()->withErrors([
+                'error' => 'Error al editar el alumno.',
+                //'nombre' => 'Este campo forma parte de la clave unica',
+                //'apellido' => 'Este campo forma parte de la clave unica'
+            ]);
+            
+        }
         return redirect()->route('alumno.index');
     }
 }
+
