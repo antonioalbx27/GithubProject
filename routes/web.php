@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfesorController;
+use App\Http\Controllers\ModuloController;
 use App\Http\Controllers\AlumnoController;
+use App\Http\Controllers\MatriculaController;
 use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,7 +14,9 @@ Route::get('a/r/r/a/y', [MainController::class, 'array'])->name('array');
 //Route::get('aboutRuta', [MainController::class, 'aboutMetodo'])->name('aboutNombre');
 Route::get('portfolio', [MainController::class, 'portfolio'])->name('portfolio');
 
-//las 7 rutas
+//las 7 rutas alumno
+
+/*
 Route::get('alumno/create', [AlumnoController::class, 'create'])->name('alumno.create');
 Route::post('alumno', [AlumnoController::class, 'store'])->name('alumno.store');
 Route::get('alumno/{alumno}/edit', [AlumnoController::class, 'edit'])->name('alumno.edit');
@@ -21,6 +25,13 @@ Route::put('alumno/{alumno}', [AlumnoController::class, 'update'])->name('alumno
 Route::get('alumno/{alumno}', [AlumnoController::class, 'show'])->name('alumno.show');
 Route::delete('alumno/{alumno}', [AlumnoController::class, 'destroy'])->name('alumno.destroy');
 
+
+*/
+Route::resource('alumno', AlumnoController::class);
+
+//las 7 rutas profesor
+
+/*
 Route::get('profesor/create', [ProfesorController::class, 'create'])->name('profesor.create');
 Route::post('profesor', [ProfesorController::class, 'store'])->name('profesor.store');
 Route::get('profesor/{profesor}/edit', [ProfesorController::class, 'edit'])->name('profesor.edit');
@@ -28,3 +39,14 @@ Route::get('profesor', [ProfesorController::class, 'index'])->name('profesor.ind
 Route::put('profesor/{profesor}', [ProfesorController::class, 'update'])->name('profesor.update');
 Route::get('profesor/{profesor}', [ProfesorController::class, 'show'])->name('profesor.show');
 Route::delete('profesor/{profesor}', [ProfesorController::class, 'destroy'])->name('profesor.destroy');
+*/
+
+Route::resource('profesor', ProfesorController::class);
+
+
+//las 7 rutas modulo
+
+Route::resource('modulo', ModuloController::class);
+Route::resource('modulo', MatriculaController::class);
+
+
